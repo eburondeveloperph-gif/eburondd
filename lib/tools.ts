@@ -72,7 +72,7 @@ export const AVAILABLE_TOOLS: FunctionCall[] = [
   },
   {
     name: 'update_guest_language',
-    description: 'Updates the detected language of the guest customer. MUST be called immediately when the guest speaks if the current guest language is "Auto-detect".',
+    description: 'Updates the detected language of the guest customer. MUST be called only after intelligently analyzing the nuances and context of the guest\'s speech to accurately determine the language. Do not guess prematurely.',
     parameters: {
       type: Type.OBJECT,
       properties: {

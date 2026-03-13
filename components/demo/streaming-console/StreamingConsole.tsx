@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 import { useEffect, useRef, useState } from 'react';
-import PopUp from '../popup/PopUp';
 // FIX: Import LiveServerContent to correctly type the content handler.
 import { LiveConnectConfig, Modality, LiveServerContent } from '@google/genai';
 
@@ -57,11 +56,6 @@ export default function StreamingConsole() {
   const { systemPrompt, voice } = useSettings();
   const turns = useLogStore(state => state.turns);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [showPopUp, setShowPopUp] = useState(true);
-
-  const handleClosePopUp = () => {
-    setShowPopUp(false);
-  };
 
   // Set the configuration for the Live API
   useEffect(() => {
@@ -185,7 +179,6 @@ export default function StreamingConsole() {
 
   return (
     <div className="transcription-container">
-      {showPopUp && <PopUp onClose={handleClosePopUp} />}
       <div className="transcription-view" ref={scrollRef}>
         {turns.length === 0 && (
           <div className="empty-state">

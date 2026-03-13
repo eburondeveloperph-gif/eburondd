@@ -103,15 +103,11 @@ export function useLiveApi({
       const functionResponses: any[] = [];
 
       for (const fc of toolCall.functionCalls) {
-        // Log the function call trigger
+        // Log the function call trigger (removed from UI to only show transcript/translation)
         const triggerMessage = `Triggering function call: **${
           fc.name
         }**\n\`\`\`json\n${JSON.stringify(fc.args, null, 2)}\n\`\`\``;
-        useLogStore.getState().addTurn({
-          role: 'system',
-          text: triggerMessage,
-          isFinal: true,
-        });
+        console.log(triggerMessage);
 
         // Prepare the response
         const response: any = { result: 'ok' };
@@ -137,18 +133,14 @@ export function useLiveApi({
         });
       }
 
-      // Log the function call response
+      // Log the function call response (removed from UI to only show transcript/translation)
       if (functionResponses.length > 0) {
         const responseMessage = `Function call response:\n\`\`\`json\n${JSON.stringify(
           functionResponses,
           null,
           2,
         )}\n\`\`\``;
-        useLogStore.getState().addTurn({
-          role: 'system',
-          text: responseMessage,
-          isFinal: true,
-        });
+        console.log(responseMessage);
       }
 
       client.sendToolResponse({ functionResponses: functionResponses });
