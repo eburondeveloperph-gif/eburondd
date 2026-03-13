@@ -137,8 +137,21 @@ export function useLiveApi({
               (l) => l.toLowerCase() === language.toLowerCase()
             );
             const finalLang = matchedLang || language;
-            useSettings.getState().setGuestLanguage(finalLang);
-            response.message = `Guest language updated to ${finalLang}`;
+
+            // Only update if language is supported, is not 'Auto-detect', and is different from current
+            const currentLang = useSettings.getState().guestLanguage;
+            if (
+              matchedLang &&
+              finalLang !== 'Auto-detect' &&
+              finalLang !== currentLang
+            ) {
+              useSettings.getState().setGuestLanguage(finalLang);
+              response.message = `Guest language updated to ${finalLang}`;
+            } else if (finalLang === currentLang) {
+              response.message = `Guest language is already ${finalLang}`;
+            } else {
+              response.message = `Language '${language}' is not supported or detection is uncertain.`;
+            }
           }
         }
 

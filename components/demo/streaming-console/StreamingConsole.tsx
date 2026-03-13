@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 import { useEffect, useRef, useState } from 'react';
-import c from 'classnames';
 // FIX: Import LiveServerContent to correctly type the content handler.
 import { LiveConnectConfig, Modality, LiveServerContent } from '@google/genai';
 
@@ -177,27 +176,32 @@ export default function StreamingConsole() {
   }, [turns]);
 
   return (
-    <div className="flex-1 w-full max-w-4xl mx-auto p-4 md:p-8">
-      <div className="h-[60vh] overflow-y-auto space-y-6" ref={scrollRef}>
+    <div className="transcription-container">
+      <div className="transcription-view" ref={scrollRef}>
         {turns.length === 0 && (
-          <div className="flex items-center justify-center h-full text-zinc-500 italic">
+          <div className="empty-state">
             <p>Ready to translate. Press the play button below to start.</p>
           </div>
         )}
-        {turns.map((t, i) => (
+        {turns.filter(t => t.isFinal).map((t, i) => (
           <div
-            key={i}
-            className={c('p-4 rounded-xl border', { 
-              'bg-blue-950/20 border-blue-900/30': t.role === 'user', 
-              'bg-zinc-900/50 border-zinc-800': t.role === 'agent',
-              'opacity-60': !t.isFinal
-            })}
+            key={t.timestamp.getTime() + i}
+            className={`transcription-entry ${t.role}`}
           >
-            <div className="text-3xl md:text-5xl text-zinc-100 leading-relaxed">
-              {renderContent(t.text, t.role === 'agent')}
+              <div className="transcription-header">
+                <div className="transcription-source">
+                  {t.role === 'user'
+                    ? (isDutch(t.text) ? 'Staff' : 'Guest')
+                    : t.role === 'agent'
+                      ? 'Translation'
+                      : 'System'}
+                </div>
+              </div>
+              <div className="transcription-text-content text-3xl">
+                {renderContent(t.text, t.role === 'agent')}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
     </div>
   );
