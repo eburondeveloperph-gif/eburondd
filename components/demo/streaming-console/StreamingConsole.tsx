@@ -24,18 +24,8 @@ const formatTimestamp = (date: Date) => {
   return `${hours}:${minutes}:${seconds}.${milliseconds}`;
 };
 
-const isDutch = (text: string) => {
-  const dutchWords = ['de', 'het', 'een', 'en', 'van', 'ik', 'dat', 'die', 'zijn', 'is', 'goedendag', 'hallo', 'voor', 'jullie'];
-  const words = text.toLowerCase().split(/\s+/);
-  const matchCount = words.filter(word => dutchWords.includes(word)).length;
-  return matchCount > 0;
-};
-
-const removeDuplicateSentences = (text: string) => {
-  const sentences = text.split('.').filter(s => s.trim() !== '');
-  const uniqueSentences = Array.from(new Set(sentences.map(s => s.trim())));
-  return uniqueSentences.join('. ') + (uniqueSentences.length > 0 ? '.' : '');
-};
+import { isDutch, removeDuplicateSentences } from '@/lib/utils';
+import { AVAILABLE_TOOLS } from '@/lib/tools';
 
 const renderContent = (text: string, isAgent: boolean) => {
   const processedText = isAgent ? removeDuplicateSentences(text) : text;
@@ -48,9 +38,6 @@ const renderContent = (text: string, isAgent: boolean) => {
     return boldPart;
   });
 };
-
-
-import { AVAILABLE_TOOLS } from '@/lib/tools';
 
 export default function StreamingConsole() {
   const { client, setConfig } = useLiveAPIContext();

@@ -74,3 +74,16 @@ export function base64ToArrayBuffer(base64: string) {
   }
   return bytes.buffer;
 }
+
+export const isDutch = (text: string) => {
+  const dutchWords = ['de', 'het', 'een', 'en', 'van', 'ik', 'dat', 'die', 'zijn', 'is', 'goedendag', 'hallo', 'voor', 'jullie'];
+  const words = text.toLowerCase().split(/\s+/);
+  const matchCount = words.filter(word => dutchWords.includes(word)).length;
+  return matchCount > 0;
+};
+
+export const removeDuplicateSentences = (text: string) => {
+  const sentences = text.split('.').filter(s => s.trim() !== '');
+  const uniqueSentences = Array.from(new Set(sentences.map(s => s.trim())));
+  return uniqueSentences.join('. ') + (uniqueSentences.length > 0 ? '.' : '');
+};

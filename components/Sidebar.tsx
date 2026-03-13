@@ -7,6 +7,7 @@ import c from 'classnames';
 import { DEFAULT_LIVE_API_MODEL, AVAILABLE_VOICES, SUPPORTED_LANGUAGES } from '@/lib/constants';
 import { useLiveAPIContext } from '@/contexts/LiveAPIContext';
 import { useState } from 'react';
+import { isDutch, removeDuplicateSentences } from '@/lib/utils';
 
 const AVAILABLE_MODELS = [
   DEFAULT_LIVE_API_MODEL
@@ -92,8 +93,14 @@ export default function Sidebar() {
                 <div className="history-list">
                   {turns.map((turn, i) => (
                     <div key={i} className={c('history-item', turn.role)}>
-                      <span className="history-role">{turn.role === 'user' ? 'Staff/Guest' : 'Translation'}</span>
-                      <p className="history-text">{turn.text}</p>
+                      <span className="history-role">
+                        {turn.role === 'user' 
+                          ? (isDutch(turn.text) ? 'Staff' : 'Guest') 
+                          : 'Translation'}
+                      </span>
+                      <p className="history-text">
+                        {turn.role === 'agent' ? removeDuplicateSentences(turn.text) : turn.text}
+                      </p>
                       <span className="history-time">{turn.timestamp.toLocaleTimeString()}</span>
                     </div>
                   ))}
