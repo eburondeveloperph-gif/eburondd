@@ -1,30 +1,79 @@
-@import "tailwindcss";
+body {
+  margin: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+code {
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
 
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+:root {
+  --text: #e1e2e3;
+  --background: #000000;
+  --background-gradient: linear-gradient(180deg, #0a0a0a 0%, #000000 100%);
+  --gray-200: #b4b8bb;
+  --gray-300: #80868b;
+  --gray-500: #5f6368;
+  --gray-600: #80868b;
+  --gray-700: #5f6368;
+  --gray-800: #3c4043;
+  --gray-900: #1a1a1a;
+  --gray-1000: #0a0a0a;
+  --border-stroke: #333333;
+  --accent-blue: rgb(161, 228, 242);
+  --accent-blue-active-bg: #001233;
+  --accent-blue-active: #98beff;
+  --accent-blue-headers: #448dff;
+  --accent-green: rgb(168, 218, 181);
+  --midnight-blue: rgb(0, 12, 30);
+  --blue-30: #99beff;
+  --accent-red: #ff4600;
+  
+  scrollbar-color: var(--gray-600) #000000;
+  scrollbar-width: thin;
+  --font-family: 'Inter', 'Space Mono', monospace;
+  
+  /* Colors */
+  --Neutral-00: #000000;
+  --Neutral-5: #0a0a0a;
+  --Neutral-10: #121212;
+  --Neutral-15: #1a1a1a;
+  --Neutral-20: #262626;
+  --Neutral-30: #404040;
+  --Neutral-50: #737373;
+  --Neutral-60: #a3a3a3;
+  --Neutral-80: #d4d4d4;
+  --Neutral-90: #e5e5e5;
+  --Green-500: #10b981;
+  --Green-700: #065f46;
+  --Blue-400: #60a5fa;
+  --Blue-500: #3b82f6;
+  --Blue-800: #1e40af;
+  --Red-400: #f87171;
+  --Red-500: #ef4444;
+  --Red-600: #dc2626;
+  --Red-700: #b91c1c;
+  --card-header: #3b82f6;
+  --card-border: #2563eb;
+  --card-background: #121212;
+  --card-border-radius: 16px;
+
+  --breakpoint-md: 768px;
 }
 
 body {
   margin: 0;
-  font-family: var(--font-sans);
+  font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: radial-gradient(circle at top right, #18181b, #000000);
+  background: var(--background-gradient);
+  color: var(--text);
   min-height: 100vh;
-  color: #e4e4e7;
-}
-
-/* Base styles for dark mode */
-* {
-  box-sizing: border-box;
-}
-
-/* Touch friendly targets */
-button, select, input, textarea {
-  min-height: 44px;
-  min-width: 44px;
 }
 
 h1,
