@@ -29,6 +29,7 @@ export const DEFAULT_VOICE = 'Zephyr';
 export const AVAILABLE_VOICES = ['Zephyr', 'Puck', 'Charon', 'Luna', 'Nova', 'Kore', 'Fenrir',	'Leda', 'Orus','Aoede','Callirrhoe','Autonoe','Enceladus','Iapetus','Umbriel','Algieba','Despina','Erinome','Algenib','Rasalgethi','Laomedeia','Achernar','Alnilam','Schedar','Gacrux','Pulcherrima','Achird',	'Zubenelgenubi','Vindemiatrix','Sadachbia','Sadaltager','Sulafat'];
 
 export const SUPPORTED_LANGUAGES = [
+  'Automatic Selection',
   'English',
   'French',
   'Dutch',

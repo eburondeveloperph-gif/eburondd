@@ -32,9 +32,9 @@ export const useSettings = create<{
   updateSystemPrompt: () => void;
 }>(set => ({
   staffLanguage: 'Dutch',
-  guestLanguage: 'French',
+  guestLanguage: 'Automatic Selection',
   topic: 'Pharmacy Consultation',
-  systemPrompt: getTranslationPrompt('Dutch', 'French', 'Pharmacy Consultation'),
+  systemPrompt: getTranslationPrompt('Dutch', 'Automatic Selection', 'Pharmacy Consultation'),
   model: DEFAULT_LIVE_API_MODEL,
   voice: 'Orus',
   setSystemPrompt: prompt => set({ systemPrompt: prompt }),

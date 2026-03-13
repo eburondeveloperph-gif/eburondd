@@ -36,6 +36,7 @@ function ControlTray({ children }: ControlTrayProps) {
   const connectButtonRef = useRef<HTMLButtonElement>(null);
 
   const { client, connected, connect, disconnect } = useLiveAPIContext();
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
   useEffect(() => {
     if (!connected && connectButtonRef.current) {
@@ -46,6 +47,7 @@ function ControlTray({ children }: ControlTrayProps) {
   useEffect(() => {
     if (!connected) {
       setMuted(false);
+      setIsAudioPlaying(false);
     }
   }, [connected]);
 
@@ -58,7 +60,7 @@ function ControlTray({ children }: ControlTrayProps) {
         },
       ]);
     };
-    if (connected && !muted && audioRecorder) {
+    if (connected && !muted && audioRecorder && !isAudioPlaying) {
       audioRecorder.on('data', onData);
       audioRecorder.start();
     } else {
@@ -67,13 +69,30 @@ function ControlTray({ children }: ControlTrayProps) {
     return () => {
       audioRecorder.off('data', onData);
     };
-  }, [connected, client, muted, audioRecorder]);
+  }, [connected, client, muted, audioRecorder, isAudioPlaying]);
+
+  const handleConnectToggle = async () => {
+    if (connected) {
+      disconnect();
+    } else {
+      setIsAudioPlaying(true);
+      const audio = new Audio('/speak.mp3');
+      audio.play().catch(e => console.error("Audio play failed", e));
+      
+      // Play for 3 seconds then start mic
+      setTimeout(() => {
+        setIsAudioPlaying(false);
+      }, 3000);
+
+      connect();
+    }
+  };
 
   const handleMicClick = () => {
     if (connected) {
       setMuted(!muted);
     } else {
-      connect();
+      handleConnectToggle();
     }
   };
 
@@ -152,7 +171,7 @@ function ControlTray({ children }: ControlTrayProps) {
           <button
             ref={connectButtonRef}
             className={cn('action-button connect-toggle', { connected })}
-            onClick={connected ? disconnect : connect}
+            onClick={handleConnectToggle}
             title={connectButtonTitle}
           >
             <span className="material-symbols-outlined filled">
