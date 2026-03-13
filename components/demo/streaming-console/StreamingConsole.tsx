@@ -41,7 +41,7 @@ const renderContent = (text: string, isAgent: boolean) => {
 
 export default function StreamingConsole() {
   const { client, setConfig } = useLiveAPIContext();
-  const { systemPrompt, voice } = useSettings();
+  const { systemPrompt, voice, guestLanguage, setGuestLanguage } = useSettings();
   const turns = useLogStore(state => state.turns);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -175,19 +175,40 @@ export default function StreamingConsole() {
     }
   }, [turns]);
 
+  const guestLanguages = ['Auto-detect', 'English', 'Dutch (Flemish)', 'Spanish', 'French', 'German'];
+
   return (
     <div className="transcription-container">
+      <div className="mb-4">
+        <label className="text-white mr-2">Guest Language:</label>
+        <select 
+          value={guestLanguage} 
+          onChange={(e) => setGuestLanguage(e.target.value)}
+          className="bg-gray-800 text-white p-2 rounded"
+        >
+          {guestLanguages.map(lang => <option key={lang} value={lang}>{lang}</option>)}
+        </select>
+      </div>
       <div className="transcription-view" ref={scrollRef}>
         {turns.length === 0 && (
           <div className="empty-state">
             <p>Ready to translate. Press the play button below to start.</p>
           </div>
         )}
-        {turns.filter(t => t.isFinal && t.role !== 'system').map((t, i) => (
+        {turns.filter(t => t.isFinal).map((t, i) => (
           <div
             key={t.timestamp.getTime() + i}
             className={`transcription-entry ${t.role}`}
           >
+              <div className="transcription-header">
+                <div className="transcription-source">
+                  {t.role === 'user'
+                    ? (isDutch(t.text) ? 'Staff' : 'Guest')
+                    : t.role === 'agent'
+                      ? 'Translation'
+                      : 'System'}
+                </div>
+              </div>
               <div className="transcription-text-content text-5xl">
                 {renderContent(t.text, t.role === 'agent')}
               </div>
