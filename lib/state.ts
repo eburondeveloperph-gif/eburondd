@@ -12,6 +12,7 @@ import {
 } from '@google/genai';
 
 import { getTranslationPrompt } from './prompts';
+import { saveConversationTurn } from './db';
 
 /**
  * Settings
@@ -119,10 +120,13 @@ export const useLogStore = create<{
   clearTurns: () => void;
 }>((set, get) => ({
   turns: [],
-  addTurn: (turn: Omit<ConversationTurn, 'timestamp'>) =>
+  addTurn: (turn: Omit<ConversationTurn, 'timestamp'>) => {
+    const newTurn = { ...turn, timestamp: new Date() };
     set(state => ({
-      turns: [...state.turns, { ...turn, timestamp: new Date() }],
-    })),
+      turns: [...state.turns, newTurn],
+    }));
+    saveConversationTurn(newTurn);
+  },
   updateLastTurn: (update: Partial<Omit<ConversationTurn, 'timestamp'>>) => {
     set(state => {
       if (state.turns.length === 0) {
