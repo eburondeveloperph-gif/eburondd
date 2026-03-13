@@ -183,21 +183,12 @@ export default function StreamingConsole() {
             <p>Ready to translate. Press the play button below to start.</p>
           </div>
         )}
-        {turns.filter(t => t.isFinal).map((t, i) => (
+        {turns.filter(t => t.isFinal && t.role !== 'system').map((t, i) => (
           <div
             key={t.timestamp.getTime() + i}
             className={`transcription-entry ${t.role}`}
           >
-              <div className="transcription-header">
-                <div className="transcription-source">
-                  {t.role === 'user'
-                    ? (isDutch(t.text) ? 'Staff' : 'Guest')
-                    : t.role === 'agent'
-                      ? 'Translation'
-                      : 'System'}
-                </div>
-              </div>
-              <div className="transcription-text-content text-3xl">
+              <div className="transcription-text-content text-5xl">
                 {renderContent(t.text, t.role === 'agent')}
               </div>
             </div>
