@@ -11,7 +11,7 @@ export default function Header() {
     <header>
       <div className="header-left">
         <h1>DualTranslate</h1>
-        <p>Real-time, bi-directional speech translation bridge.</p>
+        <p>Real-time, bi-directional speech.</p>
       </div>
       <div className="header-right">
         <button

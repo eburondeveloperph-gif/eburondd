@@ -21,9 +21,10 @@
 import cn from 'classnames';
 
 import { memo, ReactNode, useEffect, useRef, useState } from 'react';
-import { Speaker } from 'lucide-react';
+import { Speaker, Volume2 } from 'lucide-react';
 import { AudioRecorder } from '../../../lib/audio-recorder';
 import { useSettings, useLogStore, useUI } from '@/lib/state';
+import { Visualizer } from './Visualizer';
 
 import { useLiveAPIContext } from '../../../contexts/LiveAPIContext';
 
@@ -34,11 +35,22 @@ export type ControlTrayProps = {
 function ControlTray({ children }: ControlTrayProps) {
   const [audioRecorder] = useState(() => new AudioRecorder());
   const [muted, setMuted] = useState(false);
+  const [volume, setVolume] = useState(0);
   const connectButtonRef = useRef<HTMLButtonElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const { client, connected, connect, disconnect } = useLiveAPIContext();
   const { isAudioPlaying, setIsAudioPlaying } = useUI();
+
+  useEffect(() => {
+    const onVolume = (v: number) => {
+      setVolume(v);
+    };
+    audioRecorder.on('volume', onVolume);
+    return () => {
+      audioRecorder.off('volume', onVolume);
+    };
+  }, [audioRecorder]);
 
   useEffect(() => {
     if (!connected && connectButtonRef.current) {
@@ -111,35 +123,6 @@ function ControlTray({ children }: ControlTrayProps) {
     }
   };
 
-  const handleExportLogs = () => {
-    const { systemPrompt, model } = useSettings.getState();
-    const { turns } = useLogStore.getState();
-
-    const logData = {
-      configuration: {
-        model,
-        systemPrompt,
-      },
-      conversation: turns.map(turn => ({
-        ...turn,
-        // Convert Date object to ISO string for JSON serialization
-        timestamp: turn.timestamp.toISOString(),
-      })),
-    };
-
-    const jsonString = JSON.stringify(logData, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    a.href = url;
-    a.download = `dualtranslate-logs-${timestamp}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   const micButtonTitle = connected
     ? muted
       ? 'Unmute microphone'
@@ -161,14 +144,14 @@ function ControlTray({ children }: ControlTrayProps) {
           ) : (
             <span className="material-symbols-outlined filled">mic_off</span>
           )}
+          <Visualizer isSpeaking={!muted && volume > 0.05} />
         </button>
         <button
           className={cn('action-button')}
-          onClick={handleExportLogs}
-          aria-label="Export Logs"
-          title="Export session logs"
+          title="AI Status"
         >
-          <Speaker size={20} />
+          <Volume2 size={20} />
+          <Visualizer isSpeaking={isAudioPlaying} />
         </button>
         <button
           className={cn('action-button')}
