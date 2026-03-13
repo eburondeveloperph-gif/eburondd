@@ -28,7 +28,16 @@ export class AudioStreamer {
   private bufferSize: number = 7680;
   // A queue of audio buffers to be played. Each buffer is a Float32Array.
   private audioQueue: Float32Array[] = [];
-  private isPlaying: boolean = false;
+  private _isPlaying: boolean = false;
+  get isPlaying() {
+    return this._isPlaying;
+  }
+  set isPlaying(value: boolean) {
+    if (this._isPlaying !== value) {
+      this._isPlaying = value;
+      this.onPlayingChange(value);
+    }
+  }
   // Indicates if the stream has finished playing, e.g., interrupted.
   private isStreamComplete: boolean = false;
   private checkInterval: number | null = null;
@@ -40,6 +49,7 @@ export class AudioStreamer {
   private endOfQueueAudioSource: AudioBufferSourceNode | null = null;
 
   public onComplete = () => {};
+  public onPlayingChange = (isPlaying: boolean) => {};
 
   constructor(public context: AudioContext) {
     this.gainNode = this.context.createGain();

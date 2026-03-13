@@ -35,6 +35,7 @@ export type UseLiveApiResults = {
   connect: () => Promise<void>;
   disconnect: () => void;
   connected: boolean;
+  isPlaying: boolean;
 
   volume: number;
 };
@@ -51,6 +52,7 @@ export function useLiveApi({
 
   const [volume, setVolume] = useState(0);
   const [connected, setConnected] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [config, setConfig] = useState<LiveConnectConfig>({});
 
   // register audio for streaming server -> speakers
@@ -58,6 +60,9 @@ export function useLiveApi({
     if (!audioStreamerRef.current) {
       audioContext({ id: 'audio-out' }).then((audioCtx: AudioContext) => {
         audioStreamerRef.current = new AudioStreamer(audioCtx);
+        audioStreamerRef.current.onPlayingChange = (playing: boolean) => {
+          setIsPlaying(playing);
+        };
         audioStreamerRef.current
           .addWorklet<any>('vumeter-out', VolMeterWorket, (ev: any) => {
             setVolume(ev.data.volume);
@@ -93,21 +98,32 @@ export function useLiveApi({
       }
     };
 
+    const onTurnComplete = () => {
+      if (audioStreamerRef.current) {
+        audioStreamerRef.current.complete();
+      }
+    };
+
     // Bind event listeners
     client.on('open', onOpen);
     client.on('close', onClose);
     client.on('interrupted', stopAudioStreamer);
     client.on('audio', onAudio);
+    client.on('turncomplete', onTurnComplete);
 
     const onToolCall = (toolCall: LiveServerToolCall) => {
       const functionResponses: any[] = [];
 
       for (const fc of toolCall.functionCalls) {
-        // Log the function call trigger (removed from UI to only show transcript/translation)
+        // Log the function call trigger
         const triggerMessage = `Triggering function call: **${
           fc.name
         }**\n\`\`\`json\n${JSON.stringify(fc.args, null, 2)}\n\`\`\``;
-        console.log(triggerMessage);
+        useLogStore.getState().addTurn({
+          role: 'system',
+          text: triggerMessage,
+          isFinal: true,
+        });
 
         // Prepare the response
         const response: any = { result: 'ok' };
@@ -133,14 +149,18 @@ export function useLiveApi({
         });
       }
 
-      // Log the function call response (removed from UI to only show transcript/translation)
+      // Log the function call response
       if (functionResponses.length > 0) {
         const responseMessage = `Function call response:\n\`\`\`json\n${JSON.stringify(
           functionResponses,
           null,
           2,
         )}\n\`\`\``;
-        console.log(responseMessage);
+        useLogStore.getState().addTurn({
+          role: 'system',
+          text: responseMessage,
+          isFinal: true,
+        });
       }
 
       client.sendToolResponse({ functionResponses: functionResponses });
@@ -155,6 +175,7 @@ export function useLiveApi({
       client.off('interrupted', stopAudioStreamer);
       client.off('audio', onAudio);
       client.off('toolcall', onToolCall);
+      client.off('turncomplete', onTurnComplete);
     };
   }, [client]);
 
@@ -179,5 +200,6 @@ export function useLiveApi({
     connected,
     disconnect,
     volume,
+    isPlaying,
   };
 }

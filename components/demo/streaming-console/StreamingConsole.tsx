@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LiveConnectConfig, Modality, LiveServerContent } from '@google/genai';
 
 import { useLiveAPIContext } from '../../../contexts/LiveAPIContext';
+import { saveTranslation } from '@/lib/db';
 import {
   useSettings,
   useLogStore,
@@ -23,28 +24,28 @@ const formatTimestamp = (date: Date) => {
   return `${hours}:${minutes}:${seconds}.${milliseconds}`;
 };
 
-const renderContent = (text: string) => {
-  // Split by ```json...``` code blocks
-  const parts = text.split(/(`{3}json\n[\s\S]*?\n`{3})/g);
+const isDutch = (text: string) => {
+  const dutchWords = ['de', 'het', 'een', 'en', 'van', 'ik', 'dat', 'die', 'zijn', 'is', 'goedendag', 'hallo', 'voor', 'jullie'];
+  const words = text.toLowerCase().split(/\s+/);
+  const matchCount = words.filter(word => dutchWords.includes(word)).length;
+  return matchCount > 0;
+};
 
-  return parts.map((part, index) => {
-    if (part.startsWith('```json')) {
-      const jsonContent = part.replace(/^`{3}json\n|`{3}$/g, '');
-      return (
-        <pre key={index}>
-          <code>{jsonContent}</code>
-        </pre>
-      );
+const removeDuplicateSentences = (text: string) => {
+  const sentences = text.split('.').filter(s => s.trim() !== '');
+  const uniqueSentences = Array.from(new Set(sentences.map(s => s.trim())));
+  return uniqueSentences.join('. ') + (uniqueSentences.length > 0 ? '.' : '');
+};
+
+const renderContent = (text: string, isAgent: boolean) => {
+  const processedText = isAgent ? removeDuplicateSentences(text) : text;
+  // Split by **bold** text
+  const boldParts = processedText.split(/(\*\*.*?\*\*)/g);
+  return boldParts.map((boldPart, boldIndex) => {
+    if (boldPart.startsWith('**') && boldPart.endsWith('**')) {
+      return <strong key={boldIndex}>{boldPart.slice(2, -2)}</strong>;
     }
-
-    // Split by **bold** text
-    const boldParts = part.split(/(\*\*.*?\*\*)/g);
-    return boldParts.map((boldPart, boldIndex) => {
-      if (boldPart.startsWith('**') && boldPart.endsWith('**')) {
-        return <strong key={boldIndex}>{boldPart.slice(2, -2)}</strong>;
-      }
-      return boldPart;
-    });
+    return boldPart;
   });
 };
 
@@ -151,10 +152,20 @@ export default function StreamingConsole() {
       }
     };
 
-    const handleTurnComplete = () => {
-      const last = useLogStore.getState().turns.at(-1);
+    const handleTurnComplete = async () => {
+      const turns = useLogStore.getState().turns;
+      const last = turns.at(-1);
       if (last && !last.isFinal) {
         updateLastTurn({ isFinal: true });
+        
+        // Save to Supabase
+        if (last.role === 'agent') {
+            const userTurns = turns.filter(t => t.role === 'user');
+            const userTurn = userTurns[userTurns.length - 1];
+            if (userTurn) {
+                await saveTranslation(userTurn.text, last.text);
+            }
+        }
       }
     };
 
@@ -194,38 +205,15 @@ export default function StreamingConsole() {
               <div className="transcription-header">
                 <div className="transcription-source">
                   {t.role === 'user'
-                    ? 'Staff / Guest'
+                    ? (isDutch(t.text) ? 'Staff' : 'Guest')
                     : t.role === 'agent'
                       ? 'Translation'
                       : 'System'}
                 </div>
-                <div className="transcription-timestamp">
-                  {formatTimestamp(t.timestamp)}
-                </div>
               </div>
-              <div className="transcription-text-content">
-                {renderContent(t.text)}
+              <div className="transcription-text-content text-3xl">
+                {renderContent(t.text, t.role === 'agent')}
               </div>
-              {t.groundingChunks && t.groundingChunks.length > 0 && (
-                <div className="grounding-chunks">
-                  <strong>Sources:</strong>
-                  <ul>
-                    {t.groundingChunks
-                      .filter(chunk => chunk.web)
-                      .map((chunk, index) => (
-                        <li key={index}>
-                          <a
-                            href={chunk.web!.uri}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {chunk.web!.title || chunk.web!.uri}
-                          </a>
-                        </li>
-                      ))}
-                  </ul>
-                </div>
-              )}
             </div>
           ))}
       </div>

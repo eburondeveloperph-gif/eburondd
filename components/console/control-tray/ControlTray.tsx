@@ -21,6 +21,7 @@
 import cn from 'classnames';
 
 import { memo, ReactNode, useEffect, useRef, useState } from 'react';
+import { Speaker } from 'lucide-react';
 import { AudioRecorder } from '../../../lib/audio-recorder';
 import { useSettings, useLogStore, useUI } from '@/lib/state';
 
@@ -80,24 +81,23 @@ function ControlTray({ children }: ControlTrayProps) {
     if (connected) {
       disconnect();
     } else {
+      if (isAudioPlaying) return; // Prevent multiple starts
+
       setIsAudioPlaying(true);
       const audio = new Audio('/speak.mp3');
       audioRef.current = audio;
       
-      const onAudioEnd = () => {
+      try {
+        await audio.play();
+        await new Promise<void>((resolve) => {
+          audio.onended = () => resolve();
+          audio.onerror = () => resolve(); // Resolve on error too, to not block
+        });
+      } catch (e) {
+        console.error("Audio play failed", e);
+      } finally {
         setIsAudioPlaying(false);
-      };
-
-      audio.onended = onAudioEnd;
-      audio.onerror = (e) => {
-        console.error("Audio play failed", e);
-        onAudioEnd();
-      };
-
-      audio.play().catch(e => {
-        console.error("Audio play failed", e);
-        onAudioEnd();
-      });
+      }
 
       connect();
     }
@@ -168,7 +168,7 @@ function ControlTray({ children }: ControlTrayProps) {
           aria-label="Export Logs"
           title="Export session logs"
         >
-          <span className="icon">download</span>
+          <Speaker size={20} />
         </button>
         <button
           className={cn('action-button')}
