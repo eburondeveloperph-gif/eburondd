@@ -51,6 +51,8 @@ const renderContent = (text: string) => {
 };
 
 
+import { AVAILABLE_TOOLS } from '@/lib/tools';
+
 export default function StreamingConsole() {
   const { client, setConfig } = useLiveAPIContext();
   const { systemPrompt, voice } = useSettings();
@@ -84,7 +86,11 @@ export default function StreamingConsole() {
           },
         ],
       },
-      tools: [],
+      tools: [
+        {
+          functionDeclarations: AVAILABLE_TOOLS.filter(t => t.isEnabled),
+        },
+      ],
     };
 
     setConfig(config);

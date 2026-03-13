@@ -70,4 +70,20 @@ export const AVAILABLE_TOOLS: FunctionCall[] = [
     isEnabled: true,
     scheduling: FunctionResponseScheduling.INTERRUPT,
   },
+  {
+    name: 'update_guest_language',
+    description: 'Updates the detected language of the guest customer.',
+    parameters: {
+      type: 'OBJECT',
+      properties: {
+        language: {
+          type: 'STRING',
+          description: 'The name of the language detected (e.g., French, German, Arabic, Turkish, English).',
+        },
+      },
+      required: ['language'],
+    },
+    isEnabled: true,
+    scheduling: FunctionResponseScheduling.INTERRUPT,
+  },
 ];

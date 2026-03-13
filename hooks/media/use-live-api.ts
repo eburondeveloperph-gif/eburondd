@@ -113,10 +113,21 @@ export function useLiveApi({
         });
 
         // Prepare the response
+        const response: any = { result: 'ok' };
+
+        // Handle specific tools
+        if (fc.name === 'update_guest_language') {
+          const { language } = fc.args as any;
+          if (language) {
+            useSettings.getState().setGuestLanguage(language);
+            response.message = `Guest language updated to ${language}`;
+          }
+        }
+
         functionResponses.push({
           id: fc.id,
           name: fc.name,
-          response: { result: 'ok' }, // simple, hard-coded function response
+          response,
         });
       }
 
