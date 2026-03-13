@@ -19,12 +19,10 @@ export default function Sidebar() {
     voice, 
     staffLanguage, 
     guestLanguage, 
-    topic,
     setModel, 
     setVoice,
     setStaffLanguage,
     setGuestLanguage,
-    setTopic
   } = useSettings();
   const { turns } = useLogStore();
   const { connected } = useLiveAPIContext();
@@ -67,21 +65,12 @@ export default function Sidebar() {
                   </select>
                 </label>
                 <label>
-                  Guest Language (Default)
+                  Guest Language
                   <select value={guestLanguage} onChange={e => setGuestLanguage(e.target.value)}>
                     {SUPPORTED_LANGUAGES.map(lang => (
                       <option key={lang} value={lang}>{lang}</option>
                     ))}
                   </select>
-                </label>
-                <label>
-                  Conversation Topic
-                  <input 
-                    type="text"
-                    value={topic}
-                    onChange={e => setTopic(e.target.value)}
-                    placeholder="e.g. Pharmacy Consultation"
-                  />
                 </label>
                 <label>
                   Voice

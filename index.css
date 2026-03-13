@@ -699,6 +699,17 @@ header .export-button {
   line-height: 1.5;
 }
 
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: var(--gray-500);
+  font-size: 18px;
+  font-style: italic;
+  text-align: center;
+}
+
 .transcription-entry {
   display: flex;
   flex-direction: column;

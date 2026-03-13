@@ -4,7 +4,6 @@
 */
 import { useEffect, useRef, useState } from 'react';
 import PopUp from '../popup/PopUp';
-import WelcomeScreen from '../welcome-screen/WelcomeScreen';
 // FIX: Import LiveServerContent to correctly type the content handler.
 import { LiveConnectConfig, Modality, LiveServerContent } from '@google/genai';
 
@@ -79,19 +78,21 @@ export default function StreamingConsole() {
       },
       inputAudioTranscription: {},
       outputAudioTranscription: {},
-      systemInstruction: {
-        parts: [
-          {
-            text: systemPrompt,
-          },
-        ],
-      },
-      tools: [
-        {
-          functionDeclarations: AVAILABLE_TOOLS.filter(t => t.isEnabled),
-        },
-      ],
+      systemInstruction: systemPrompt,
     };
+
+    const activeTools = AVAILABLE_TOOLS.filter(t => t.isEnabled);
+    if (activeTools.length > 0) {
+      config.tools = [
+        {
+          functionDeclarations: activeTools.map(t => ({
+            name: t.name,
+            description: t.description,
+            parameters: t.parameters,
+          })),
+        },
+      ];
+    }
 
     setConfig(config);
   }, [setConfig, systemPrompt, voice]);
@@ -185,16 +186,18 @@ export default function StreamingConsole() {
   return (
     <div className="transcription-container">
       {showPopUp && <PopUp onClose={handleClosePopUp} />}
-      {turns.length === 0 ? (
-        <WelcomeScreen />
-      ) : (
-        <div className="transcription-view" ref={scrollRef}>
-          {turns.map((t, i) => (
-            <div
-              key={i}
-              className={`transcription-entry ${t.role} ${!t.isFinal ? 'interim' : ''
-                }`}
-            >
+      <div className="transcription-view" ref={scrollRef}>
+        {turns.length === 0 && (
+          <div className="empty-state">
+            <p>Ready to translate. Press the play button below to start.</p>
+          </div>
+        )}
+        {turns.map((t, i) => (
+          <div
+            key={i}
+            className={`transcription-entry ${t.role} ${!t.isFinal ? 'interim' : ''
+              }`}
+          >
               <div className="transcription-header">
                 <div className="transcription-source">
                   {t.role === 'user'
@@ -232,8 +235,7 @@ export default function StreamingConsole() {
               )}
             </div>
           ))}
-        </div>
-      )}
+      </div>
     </div>
   );
 }

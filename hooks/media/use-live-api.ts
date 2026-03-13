@@ -25,6 +25,7 @@ import { AudioStreamer } from '../../lib/audio-streamer';
 import { audioContext } from '../../lib/utils';
 import VolMeterWorket from '../../lib/worklets/vol-meter';
 import { useLogStore, useSettings } from '@/lib/state';
+import { SUPPORTED_LANGUAGES } from '@/lib/constants';
 
 export type UseLiveApiResults = {
   client: GenAILiveClient;
@@ -119,8 +120,13 @@ export function useLiveApi({
         if (fc.name === 'update_guest_language') {
           const { language } = fc.args as any;
           if (language) {
-            useSettings.getState().setGuestLanguage(language);
-            response.message = `Guest language updated to ${language}`;
+            // Try to match with SUPPORTED_LANGUAGES (case-insensitive)
+            const matchedLang = SUPPORTED_LANGUAGES.find(
+              (l) => l.toLowerCase() === language.toLowerCase()
+            );
+            const finalLang = matchedLang || language;
+            useSettings.getState().setGuestLanguage(finalLang);
+            response.message = `Guest language updated to ${finalLang}`;
           }
         }
 

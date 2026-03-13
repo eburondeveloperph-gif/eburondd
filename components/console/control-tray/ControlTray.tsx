@@ -22,7 +22,7 @@ import cn from 'classnames';
 
 import { memo, ReactNode, useEffect, useRef, useState } from 'react';
 import { AudioRecorder } from '../../../lib/audio-recorder';
-import { useSettings, useLogStore } from '@/lib/state';
+import { useSettings, useLogStore, useUI } from '@/lib/state';
 
 import { useLiveAPIContext } from '../../../contexts/LiveAPIContext';
 
@@ -34,9 +34,10 @@ function ControlTray({ children }: ControlTrayProps) {
   const [audioRecorder] = useState(() => new AudioRecorder());
   const [muted, setMuted] = useState(false);
   const connectButtonRef = useRef<HTMLButtonElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const { client, connected, connect, disconnect } = useLiveAPIContext();
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const { isAudioPlaying, setIsAudioPlaying } = useUI();
 
   useEffect(() => {
     if (!connected && connectButtonRef.current) {
@@ -48,8 +49,12 @@ function ControlTray({ children }: ControlTrayProps) {
     if (!connected) {
       setMuted(false);
       setIsAudioPlaying(false);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
     }
-  }, [connected]);
+  }, [connected, setIsAudioPlaying]);
 
   useEffect(() => {
     const onData = (base64: string) => {
@@ -77,12 +82,22 @@ function ControlTray({ children }: ControlTrayProps) {
     } else {
       setIsAudioPlaying(true);
       const audio = new Audio('/speak.mp3');
-      audio.play().catch(e => console.error("Audio play failed", e));
+      audioRef.current = audio;
       
-      // Play for 3 seconds then start mic
-      setTimeout(() => {
+      const onAudioEnd = () => {
         setIsAudioPlaying(false);
-      }, 3000);
+      };
+
+      audio.onended = onAudioEnd;
+      audio.onerror = (e) => {
+        console.error("Audio play failed", e);
+        onAudioEnd();
+      };
+
+      audio.play().catch(e => {
+        console.error("Audio play failed", e);
+        onAudioEnd();
+      });
 
       connect();
     }

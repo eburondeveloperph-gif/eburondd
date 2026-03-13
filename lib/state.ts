@@ -22,38 +22,31 @@ export const useSettings = create<{
   voice: string;
   staffLanguage: string;
   guestLanguage: string;
-  topic: string;
   setSystemPrompt: (prompt: string) => void;
   setModel: (model: string) => void;
   setVoice: (voice: string) => void;
   setStaffLanguage: (lang: string) => void;
   setGuestLanguage: (lang: string) => void;
-  setTopic: (topic: string) => void;
   updateSystemPrompt: () => void;
 }>(set => ({
-  staffLanguage: 'Dutch',
-  guestLanguage: 'Automatic Selection',
-  topic: 'Pharmacy Consultation',
-  systemPrompt: getTranslationPrompt('Dutch', 'Automatic Selection', 'Pharmacy Consultation'),
+  staffLanguage: 'Dutch (Flemish)',
+  guestLanguage: 'Auto-detect',
+  systemPrompt: getTranslationPrompt('Dutch (Flemish)', 'Auto-detect'),
   model: DEFAULT_LIVE_API_MODEL,
-  voice: 'Orus',
+  voice: 'Zephyr',
   setSystemPrompt: prompt => set({ systemPrompt: prompt }),
   setModel: model => set({ model }),
   setVoice: voice => set({ voice }),
   setStaffLanguage: lang => set(state => {
     const newState = { ...state, staffLanguage: lang };
-    return { ...newState, systemPrompt: getTranslationPrompt(lang, state.guestLanguage, state.topic) };
+    return { ...newState, systemPrompt: getTranslationPrompt(lang, state.guestLanguage) };
   }),
   setGuestLanguage: lang => set(state => {
     const newState = { ...state, guestLanguage: lang };
-    return { ...newState, systemPrompt: getTranslationPrompt(state.staffLanguage, lang, state.topic) };
-  }),
-  setTopic: topic => set(state => {
-    const newState = { ...state, topic: topic };
-    return { ...newState, systemPrompt: getTranslationPrompt(state.staffLanguage, state.guestLanguage, topic) };
+    return { ...newState, systemPrompt: getTranslationPrompt(state.staffLanguage, lang) };
   }),
   updateSystemPrompt: () => set(state => ({
-    systemPrompt: getTranslationPrompt(state.staffLanguage, state.guestLanguage, state.topic)
+    systemPrompt: getTranslationPrompt(state.staffLanguage, state.guestLanguage)
   })),
 }));
 
@@ -62,10 +55,14 @@ export const useSettings = create<{
  */
 export const useUI = create<{
   isSidebarOpen: boolean;
+  isAudioPlaying: boolean;
   toggleSidebar: () => void;
+  setIsAudioPlaying: (isPlaying: boolean) => void;
 }>(set => ({
   isSidebarOpen: true,
+  isAudioPlaying: false,
   toggleSidebar: () => set(state => ({ isSidebarOpen: !state.isSidebarOpen })),
+  setIsAudioPlaying: isPlaying => set({ isAudioPlaying: isPlaying }),
 }));
 
 /**
