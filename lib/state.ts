@@ -33,7 +33,7 @@ export const useSettings = create<{
   guestLanguage: 'Auto-detect',
   systemPrompt: getTranslationPrompt('Dutch (Flemish)', 'Auto-detect'),
   model: DEFAULT_LIVE_API_MODEL,
-  voice: 'Zephyr',
+  voice: 'Orus',
   setSystemPrompt: prompt => set({ systemPrompt: prompt }),
   setModel: model => set({ model }),
   setVoice: voice => set({ voice }),
